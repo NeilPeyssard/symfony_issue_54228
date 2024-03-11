@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+  database:
+    image: mysql:latest
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-symfony}
+      - MYSQL_USER=${MYSQL_USER:-symfony}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-symfony}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root}
+    volumes:
+      - database_data:/var/lib/mysql
+
+  php-fpm:
+    build:
+      context: ./docker/php-fpm
+    volumes:
+      - app_data:/var/www/symfony
+      - sf_data:/var/www/lib/symfony
+    working_dir: /var/www/symfony
+
+  nginx:
+    build:
+      context: ./docker/nginx
+    depends_on:
+      - php-fpm
+    volumes:
+      - app_data:/var/www/symfony
+    working_dir: /var/www/symfony
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+
+volumes:
+  database_data: ~
+  app_data:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: './'
+  sf_data:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: './../symfony/'

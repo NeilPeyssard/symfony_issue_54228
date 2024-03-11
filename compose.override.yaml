@@ -1,0 +1,38 @@
+services:
+  nginx:
+    ports:
+      - "80:80"
+      - "443:443"
+
+  mailcatcher:
+    image: jeanberu/mailcatcher
+    ports:
+      - "1025:1025"
+      - "1080:1080"
+
+  phpmyadmin:
+    image: phpmyadmin
+    environment:
+      - PMA_HOST=database
+    ports:
+      - "8082:80"
+    depends_on:
+      - database
+
+  rabbitmq:
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  database_test:
+    image: mysql:8.2
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-symfony_test}
+      - MYSQL_USER=${MYSQL_USER:-symfony}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-symfony}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root}
+    volumes:
+      - database_test_data:/var/lib/mysql
+
+volumes:
+  database_test_data: ~
